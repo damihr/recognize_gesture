@@ -403,8 +403,8 @@
         let videoHeight = 480;
         let mediaPipeReady = false;
 
-        // Define all functions first and make them global immediately
-        function switchTab(tab) {
+        // Define all functions and assign to window immediately
+        window.switchTab = function(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             
@@ -417,9 +417,9 @@
             
             stopCollecting();
             stopTesting();
-        }
+        };
 
-        async function startCollecting() {
+        window.startCollecting = async function() {
             if (!mediaPipeReady || !hands) {
                 alert('MediaPipe is still loading. Please wait a moment...');
                 return;
@@ -466,9 +466,9 @@
             document.getElementById('sampleCount').textContent = samples.length;
             document.getElementById('collectStatus').textContent = `✓ Saved sample #${samples.length}`;
             document.getElementById('collectStatus').className = 'status success';
-        }
+        };
 
-        function stopCollecting() {
+        window.stopCollecting = function() {
             isCollecting = false;
             if (camera) {
                 try {
@@ -498,19 +498,24 @@
             const canvas = document.getElementById('canvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
             ctx.clearRect(0, 0, videoWidth, videoHeight);
             
             let allLandmarks = [];
             
-            if (results.multiHandLandmarks) {
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 for (const handLandmarks of results.multiHandLandmarks) {
-                    drawHandLandmarks(handLandmarks, ctx);
-                    
-                    const coords = [];
-                    for (const lm of handLandmarks.landmark) {
-                        coords.push(lm.x, lm.y, lm.z);
+                    // Draw landmarks - make sure we're using the landmark array correctly
+                    if (handLandmarks.landmark && handLandmarks.landmark.length > 0) {
+                        drawHandLandmarks(handLandmarks.landmark, ctx);
+                        
+                        const coords = [];
+                        for (const lm of handLandmarks.landmark) {
+                            coords.push(lm.x, lm.y, lm.z);
+                        }
+                        allLandmarks.push(coords);
                     }
-                    allLandmarks.push(coords);
                 }
             }
             
@@ -555,9 +560,9 @@
             
             document.getElementById('trainStatus').textContent = `✓ Loaded ${gestures.length} gestures with ${totalSamples} total samples`;
             document.getElementById('trainStatus').className = 'status success';
-        }
+        };
 
-        async function trainModel() {
+        window.trainModel = async function() {
             const gestures = Object.keys(dataset);
             if (gestures.length < 2) {
                 alert('Need at least 2 different gestures to train! Currently have: ' + gestures.join(', '));
@@ -622,17 +627,17 @@
             
             xs.dispose();
             ys.dispose();
-        }
+        };
 
-        function clearDataset() {
+        window.clearDataset = function() {
             if (confirm('Are you sure you want to clear all collected data? This cannot be undone.')) {
                 dataset = {};
                 localStorage.removeItem('gesture-dataset');
                 loadDataset();
             }
-        }
+        };
 
-        async function startTesting() {
+        window.startTesting = async function() {
             try {
                 if (!model) {
                     model = await tf.loadLayersModel('indexeddb://gesture-model');
@@ -672,9 +677,9 @@
                 console.error('Error starting test:', err);
                 alert('Failed to start camera. Please check permissions.');
             }
-        }
+        };
 
-        function stopTesting() {
+        window.stopTesting = function() {
             isTesting = false;
             if (camera) {
                 try {
@@ -684,7 +689,7 @@
                 }
                 camera = null;
             }
-        }
+        };
 
         function onTestResults(results) {
             if (!isTesting || !model) return;
@@ -692,19 +697,24 @@
             const canvas = document.getElementById('testCanvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
             ctx.clearRect(0, 0, videoWidth, videoHeight);
             
-            if (results.multiHandLandmarks) {
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 let allLandmarks = [];
                 
                 for (const handLandmarks of results.multiHandLandmarks) {
-                    drawHandLandmarks(handLandmarks, ctx);
-                    
-                    const coords = [];
-                    for (const lm of handLandmarks.landmark) {
-                        coords.push(lm.x, lm.y, lm.z);
+                    // Draw landmarks
+                    if (handLandmarks.landmark && handLandmarks.landmark.length > 0) {
+                        drawHandLandmarks(handLandmarks.landmark, ctx);
+                        
+                        const coords = [];
+                        for (const lm of handLandmarks.landmark) {
+                            coords.push(lm.x, lm.y, lm.z);
+                        }
+                        allLandmarks.push(coords);
                     }
-                    allLandmarks.push(coords);
                 }
                 
                 while (allLandmarks.length < 2) {
@@ -873,17 +883,6 @@
                 console.error('Error initializing MediaPipe:', err);
             }
         }
-
-        // Make all functions globally accessible
-        window.switchTab = switchTab;
-        window.startCollecting = startCollecting;
-        window.saveSample = saveSample;
-        window.stopCollecting = stopCollecting;
-        window.loadDataset = loadDataset;
-        window.trainModel = trainModel;
-        window.clearDataset = clearDataset;
-        window.startTesting = startTesting;
-        window.stopTesting = stopTesting;
 
         // Initialize on load
         window.addEventListener('load', () => {
