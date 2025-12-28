@@ -453,7 +453,7 @@
             }
         }
 
-        function saveSample() {
+        window.saveSample = function() {
             if (!isCollecting) {
                 alert('Please start collecting first');
                 return;
@@ -527,7 +527,7 @@
             currentSample = allLandmarks.flat();
         }
 
-        function loadDataset() {
+        window.loadDataset = function() {
             const gestures = Object.keys(dataset);
             const totalSamples = Object.values(dataset).reduce((sum, arr) => sum + arr.length, 0);
             
