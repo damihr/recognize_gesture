@@ -406,6 +406,9 @@
             stopCollecting();
             stopTesting();
         }
+        
+        // Make functions globally accessible
+        window.switchTab = switchTab;
 
         // Collect Mode
         async function startCollecting() {
@@ -436,6 +439,8 @@
                 camera.start();
             }
         }
+        
+        window.startCollecting = startCollecting;
 
         function saveSample() {
             if (!isCollecting || !currentSample) return;
@@ -444,6 +449,8 @@
             document.getElementById('collectStatus').textContent = `Saved sample #${samples.length}`;
             document.getElementById('collectStatus').className = 'status success';
         }
+        
+        window.saveSample = saveSample;
 
         function stopCollecting() {
             isCollecting = false;
@@ -464,6 +471,8 @@
             
             samples = [];
         }
+        
+        window.stopCollecting = stopCollecting;
 
         function onCollectResults(results) {
             if (!isCollecting) return;
@@ -529,6 +538,8 @@
             document.getElementById('trainStatus').textContent = `Loaded ${gestures.length} gestures with ${totalSamples} total samples`;
             document.getElementById('trainStatus').className = 'status success';
         }
+        
+        window.loadDataset = loadDataset;
 
         async function trainModel() {
             const gestures = Object.keys(dataset);
@@ -602,6 +613,8 @@
             xs.dispose();
             ys.dispose();
         }
+        
+        window.trainModel = trainModel;
 
         function clearDataset() {
             if (confirm('Clear all collected data?')) {
@@ -610,6 +623,8 @@
                 loadDataset();
             }
         }
+        
+        window.clearDataset = clearDataset;
 
         // Test Mode
         async function startTesting() {
@@ -648,6 +663,8 @@
                 camera.start();
             }
         }
+        
+        window.startTesting = startTesting;
 
         function stopTesting() {
             isTesting = false;
@@ -656,6 +673,8 @@
                 camera = null;
             }
         }
+        
+        window.stopTesting = stopTesting;
 
         function onTestResults(results) {
             if (!isTesting || !model) return;
@@ -728,7 +747,13 @@
                 if (typeof Camera !== 'undefined' && hands) {
                     camera = new Camera(video, {
                         onFrame: async () => {
-                            if (hands) await hands.send({ image: video });
+                            if (hands) {
+                                try {
+                                    await hands.send({ image: video });
+                                } catch (e) {
+                                    console.error('Hands send error:', e);
+                                }
+                            }
                         },
                         width: videoWidth,
                         height: videoHeight
