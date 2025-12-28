@@ -1,8 +1,8 @@
-# 🤟 Gesture Recognition - All in One
+# Gesture Recognition - All in One
 
 Train and recognize custom hand gestures using MediaPipe and machine learning. Available as both Python scripts and a web application!
 
-## 🌐 Web Version (GitHub Pages)
+## Web Version (GitHub Pages)
 
 **Try it online:** https://damihr.github.io/recognize_gesture/
 
@@ -11,14 +11,7 @@ The web version runs entirely in your browser with three integrated modes:
 2. **Train** - Train the ML model
 3. **Test** - Recognize gestures in real-time
 
-### Features:
-- ✅ All-in-one interface
-- ✅ No server needed - runs in browser
-- ✅ Data stored locally (IndexedDB/localStorage)
-- ✅ Real-time hand tracking
-- ✅ TensorFlow.js for machine learning
-
-## 💻 Python Version
+## Python Version
 
 For running locally with Python scripts.
 
@@ -37,7 +30,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## 📖 How to Use
+## How to Use
 
 ### Web Version (Recommended)
 
@@ -72,7 +65,7 @@ python train_model.py
 python translator.py
 ```
 
-## 🚀 Deploy to GitHub Pages
+## Deploy to GitHub Pages
 
 1. Push to GitHub
 2. Go to Settings → Pages
