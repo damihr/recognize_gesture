@@ -506,12 +506,16 @@
             
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 for (const handLandmarks of results.multiHandLandmarks) {
-                    // Draw landmarks - make sure we're using the landmark array correctly
-                    if (handLandmarks.landmark && handLandmarks.landmark.length > 0) {
-                        drawHandLandmarks(handLandmarks.landmark, ctx);
+                    // MediaPipe returns landmarks directly as an array
+                    const landmarks = handLandmarks.landmark || handLandmarks;
+                    
+                    if (landmarks && landmarks.length > 0) {
+                        // Draw landmarks
+                        drawHandLandmarks(landmarks, ctx);
                         
+                        // Extract coordinates
                         const coords = [];
-                        for (const lm of handLandmarks.landmark) {
+                        for (const lm of landmarks) {
                             coords.push(lm.x, lm.y, lm.z);
                         }
                         allLandmarks.push(coords);
@@ -705,12 +709,16 @@
                 let allLandmarks = [];
                 
                 for (const handLandmarks of results.multiHandLandmarks) {
-                    // Draw landmarks
-                    if (handLandmarks.landmark && handLandmarks.landmark.length > 0) {
-                        drawHandLandmarks(handLandmarks.landmark, ctx);
+                    // MediaPipe returns landmarks directly as an array
+                    const landmarks = handLandmarks.landmark || handLandmarks;
+                    
+                    if (landmarks && landmarks.length > 0) {
+                        // Draw landmarks
+                        drawHandLandmarks(landmarks, ctx);
                         
+                        // Extract coordinates
                         const coords = [];
-                        for (const lm of handLandmarks.landmark) {
+                        for (const lm of landmarks) {
                             coords.push(lm.x, lm.y, lm.z);
                         }
                         allLandmarks.push(coords);
