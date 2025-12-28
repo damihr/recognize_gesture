@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤟 Gesture Recognition - All in One</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 1200px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .mode-btn {
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .mode-btn.active {
+            background: #764ba2;
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+        }
+
+        .mode-panel {
+            display: none;
+        }
+
+        .mode-panel.active {
+            display: block;
+        }
+
+        #videoContainer {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        #videoElement {
+            width: 100%;
+            display: block;
+            transform: scaleX(-1);
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .input-group {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .input-group input {
+            padding: 12px;
+            font-size: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        #gestureList {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .gesture-item {
+            display: inline-block;
+            background: #f8f9fa;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        #predictionDisplay {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .prediction-high {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .prediction-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .prediction-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>🤟 Gesture Recognition</h1>
+        
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="switchMode('collect')">1. Collect</button>
+            <button class="mode-btn" onclick="switchMode('train')">2. Train</button>
+            <button class="mode-btn" onclick="switchMode('test')">3. Test</button>
+        </div>
+
+        <!-- Collect Mode -->
+        <div id="collectPanel" class="mode-panel active">
+            <div class="input-group">
+                <label for="gestureLabel">Gesture Label (e.g., A, B, HELLO):</label>
+                <input type="text" id="gestureLabel" placeholder="Enter gesture name" maxlength="20">
+            </div>
+            
+            <div id="videoContainer">
+                <video id="videoElement" autoplay playsinline muted></video>
+                <canvas id="canvas"></canvas>
+            </div>
+            
+            <div class="status info" id="collectStatus">Enter a gesture label and click Start Collecting</div>
+            
+            <div class="controls">
+                <button class="btn btn-primary" onclick="startCollecting()">Start Collecting</button>
+                <button class="btn btn-success" onclick="saveSample()">Save Sample (SPACE)</button>
+                <button class="btn btn-danger" onclick="stopCollecting()">Stop</button>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Current Gesture</h3>
+                    <div class="number" id="currentGesture">-</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Samples Collected</h3>
+                    <div class="number" id="sampleCount">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Train Mode -->
+        <div id="trainPanel" class="mode-panel">
+            <div class="status info" id="trainStatus">Click 'Load Dataset' to see your collected gestures</div>
+            
+            <div class="controls">
+                <button class="btn btn-primary" onclick="loadDataset()">Load Dataset</button>
+                <button class="btn btn-success" onclick="trainModel()">Train Model</button>
+                <button class="btn btn-warning" onclick="clearDataset()">Clear All Data</button>
+            </div>
+            
+            <div id="gestureList"></div>
+            
+            <div class="stats" id="trainStats"></div>
+        </div>
+
+        <!-- Test Mode -->
+        <div id="testPanel" class="mode-panel">
+            <div id="videoContainer">
+                <video id="testVideo" autoplay playsinline muted></video>
+                <canvas id="testCanvas"></canvas>
+            </div>
+            
+            <div id="predictionDisplay" class="prediction-low">No hands detected</div>
+            
+            <div class="status info" id="testStatus">Model not trained yet. Go to Train mode first.</div>
+            
+            <div class="controls">
+                <button class="btn btn-primary" onclick="startTesting()">Start Testing</button>
+                <button class="btn btn-danger" onclick="stopTesting()">Stop</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TensorFlow.js for ML -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+    
+    <!-- MediaPipe Hands -->
+    <script>
+        // Global state
+        let currentMode = 'collect';
+        let hands = null;
+        let camera = null;
+        let video = null;
+        let canvas = null;
+        let ctx = null;
+        let isCollecting = false;
+        let isTesting = false;
+        let currentLabel = '';
+        let samples = [];
+        let dataset = {};
+        let model = null;
+        let videoWidth = 640;
+        let videoHeight = 480;
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            loadDatasetFromStorage();
+            loadMediaPipe();
+        });
+
+        // Load MediaPipe
+        function loadMediaPipe() {
+            const handsSources = [
+                'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js',
+                'https://unpkg.com/@mediapipe/hands@0.4.1646424915/hands.js'
+            ];
+            
+            const cameraSources = [
+                'https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1640029074/camera_utils.js',
+                'https://unpkg.com/@mediapipe/camera_utils@0.3.1640029074/camera_utils.js'
+            ];
+
+            function tryLoadHands(index) {
+                if (index >= handsSources.length) return;
+                const script = document.createElement('script');
+                script.src = handsSources[index];
+                script.onload = () => {
+                    setTimeout(() => {
+                        if (typeof Hands !== 'undefined') {
+                            initMediaPipe();
+                            tryLoadCamera(0);
+                        } else {
+                            tryLoadHands(index + 1);
+                        }
+                    }, 500);
+                };
+                script.onerror = () => tryLoadHands(index + 1);
+                document.head.appendChild(script);
+            }
+
+            function tryLoadCamera(index) {
+                if (index >= cameraSources.length) return;
+                const script = document.createElement('script');
+                script.src = cameraSources[index];
+                script.onload = () => {
+                    setTimeout(() => {
+                        if (typeof Camera !== 'undefined') {
+                            console.log('MediaPipe ready');
+                        } else {
+                            tryLoadCamera(index + 1);
+                        }
+                    }, 500);
+                };
+                script.onerror = () => tryLoadCamera(index + 1);
+                document.head.appendChild(script);
+            }
+
+            tryLoadHands(0);
+        }
+
+        function initMediaPipe() {
+            if (typeof Hands === 'undefined') return;
+            
+            hands = new Hands({
+                locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+                }
+            });
+            
+            hands.setOptions({
+                maxNumHands: 2,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
+            });
+        }
+
+        // Mode switching
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            // Update buttons
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update panels
+            document.querySelectorAll('.mode-panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById(mode + 'Panel').classList.add('active');
+            
+            // Stop any active processes
+            stopCollecting();
+            stopTesting();
+        }
+
+        // Collect Mode
+        async function startCollecting() {
+            const label = document.getElementById('gestureLabel').value.trim().toUpperCase();
+            if (!label) {
+                alert('Please enter a gesture label');
+                return;
+            }
+            
+            currentLabel = label;
+            samples = [];
+            isCollecting = true;
+            
+            document.getElementById('currentGesture').textContent = label;
+            document.getElementById('sampleCount').textContent = '0';
+            document.getElementById('collectStatus').textContent = `Collecting samples for '${label}' - Press SPACE to save`;
+            document.getElementById('collectStatus').className = 'status info';
+            
+            await startCamera('videoElement', 'canvas');
+            
+            if (hands) {
+                hands.onResults(onCollectResults);
+                if (camera) camera.start();
+            }
+        }
+
+        function saveSample() {
+            if (!isCollecting) return;
+            samples.push(currentSample);
+            document.getElementById('sampleCount').textContent = samples.length;
+            document.getElementById('collectStatus').textContent = `✅ Saved sample #${samples.length}`;
+            document.getElementById('collectStatus').className = 'status success';
+        }
+
+        function stopCollecting() {
+            isCollecting = false;
+            if (camera) {
+                camera.stop();
+                camera = null;
+            }
+            
+            if (samples.length > 0 && currentLabel) {
+                if (!dataset[currentLabel]) {
+                    dataset[currentLabel] = [];
+                }
+                dataset[currentLabel].push(...samples);
+                saveDatasetToStorage();
+                document.getElementById('collectStatus').textContent = `💾 Saved ${samples.length} samples for '${currentLabel}'`;
+                document.getElementById('collectStatus').className = 'status success';
+            }
+            
+            samples = [];
+        }
+
+        let currentSample = null;
+
+        function onCollectResults(results) {
+            if (!isCollecting) return;
+            
+            ctx.clearRect(0, 0, videoWidth, videoHeight);
+            
+            if (results.multiHandLandmarks) {
+                let allLandmarks = [];
+                
+                for (const handLandmarks of results.multiHandLandmarks) {
+                    // Draw landmarks
+                    drawHandLandmarks(handLandmarks);
+                    
+                    // Extract landmarks
+                    const coords = [];
+                    for (const lm of handLandmarks.landmark) {
+                        coords.push(lm.x, lm.y, lm.z);
+                    }
+                    allLandmarks.push(coords);
+                }
+                
+                // Pad to 2 hands (126 values: 2 hands × 21 landmarks × 3 coords)
+                while (allLandmarks.length < 2) {
+                    allLandmarks.push(new Array(63).fill(0));
+                }
+                
+                // Flatten to 126-length vector
+                currentSample = allLandmarks.flat();
+            } else {
+                currentSample = new Array(126).fill(0);
+            }
+        }
+
+        // Train Mode
+        function loadDataset() {
+            const stats = document.getElementById('trainStats');
+            const list = document.getElementById('gestureList');
+            
+            const gestures = Object.keys(dataset);
+            const totalSamples = Object.values(dataset).reduce((sum, arr) => sum + arr.length, 0);
+            
+            if (gestures.length === 0) {
+                document.getElementById('trainStatus').textContent = 'No dataset found. Go to Collect mode first.';
+                document.getElementById('trainStatus').className = 'status warning';
+                stats.innerHTML = '';
+                list.innerHTML = '';
+                return;
+            }
+            
+            list.innerHTML = '<h3>Collected Gestures:</h3>';
+            gestures.forEach(gesture => {
+                const count = dataset[gesture].length;
+                const item = document.createElement('div');
+                item.className = 'gesture-item';
+                item.textContent = `${gesture}: ${count} samples`;
+                list.appendChild(item);
+            });
+            
+            stats.innerHTML = `
+                <div class="stat-card">
+                    <h3>Total Gestures</h3>
+                    <div class="number">${gestures.length}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Samples</h3>
+                    <div class="number">${totalSamples}</div>
+                </div>
+            `;
+            
+            document.getElementById('trainStatus').textContent = `Loaded ${gestures.length} gestures with ${totalSamples} total samples`;
+            document.getElementById('trainStatus').className = 'status success';
+        }
+
+        async function trainModel() {
+            const gestures = Object.keys(dataset);
+            if (gestures.length < 2) {
+                alert('Need at least 2 different gestures to train!');
+                return;
+            }
+            
+            document.getElementById('trainStatus').textContent = 'Training model...';
+            document.getElementById('trainStatus').className = 'status info';
+            
+            // Prepare data
+            const X = [];
+            const y = [];
+            
+            for (const [label, samples] of Object.entries(dataset)) {
+                for (const sample of samples) {
+                    X.push(sample);
+                    y.push(label);
+                }
+            }
+            
+            // Convert to tensors
+            const xs = tf.tensor2d(X);
+            const labels = y;
+            
+            // Create one-hot encoding
+            const uniqueLabels = [...new Set(labels)];
+            const labelMap = {};
+            uniqueLabels.forEach((label, idx) => {
+                labelMap[label] = idx;
+            });
+            
+            const ys = tf.oneHot(
+                tf.tensor1d(labels.map(l => labelMap[l]), 'int32'),
+                uniqueLabels.length
+            );
+            
+            // Create simple neural network
+            model = tf.sequential({
+                layers: [
+                    tf.layers.dense({ inputShape: [126], units: 64, activation: 'relu' }),
+                    tf.layers.dropout({ rate: 0.2 }),
+                    tf.layers.dense({ units: 32, activation: 'relu' }),
+                    tf.layers.dense({ units: uniqueLabels.length, activation: 'softmax' })
+                ]
+            });
+            
+            model.compile({
+                optimizer: 'adam',
+                loss: 'categoricalCrossentropy',
+                metrics: ['accuracy']
+            });
+            
+            // Train
+            await model.fit(xs, ys, {
+                epochs: 50,
+                batchSize: 32,
+                shuffle: true,
+                callbacks: {
+                    onEpochEnd: (epoch, logs) => {
+                        if ((epoch + 1) % 10 === 0) {
+                            console.log(`Epoch ${epoch + 1}: loss = ${logs.loss.toFixed(4)}, acc = ${logs.acc.toFixed(4)}`);
+                        }
+                    }
+                }
+            });
+            
+            // Store model and label map
+            model.labelMap = labelMap;
+            model.uniqueLabels = uniqueLabels;
+            
+            // Save to localStorage
+            const modelData = await model.save('indexeddb://gesture-model');
+            localStorage.setItem('gesture-label-map', JSON.stringify(labelMap));
+            localStorage.setItem('gesture-unique-labels', JSON.stringify(uniqueLabels));
+            
+            document.getElementById('trainStatus').textContent = '✅ Model trained successfully!';
+            document.getElementById('trainStatus').className = 'status success';
+            
+            xs.dispose();
+            ys.dispose();
+        }
+
+        function clearDataset() {
+            if (confirm('Are you sure you want to clear all collected data?')) {
+                dataset = {};
+                localStorage.removeItem('gesture-dataset');
+                loadDataset();
+            }
+        }
+
+        // Test Mode
+        async function startTesting() {
+            // Try to load model
+            try {
+                if (!model) {
+                    model = await tf.loadLayersModel('indexeddb://gesture-model');
+                    const labelMapStr = localStorage.getItem('gesture-label-map');
+                    const uniqueLabelsStr = localStorage.getItem('gesture-unique-labels');
+                    
+                    if (labelMapStr && uniqueLabelsStr) {
+                        model.labelMap = JSON.parse(labelMapStr);
+                        model.uniqueLabels = JSON.parse(uniqueLabelsStr);
+                    } else {
+                        throw new Error('Model metadata not found');
+                    }
+                }
+            } catch (err) {
+                document.getElementById('testStatus').textContent = 'Model not found. Please train a model first.';
+                document.getElementById('testStatus').className = 'status error';
+                return;
+            }
+            
+            isTesting = true;
+            document.getElementById('testStatus').textContent = 'Testing mode active - Show your gesture';
+            document.getElementById('testStatus').className = 'status success';
+            
+            await startCamera('testVideo', 'testCanvas');
+            
+            if (hands) {
+                hands.onResults(onTestResults);
+                if (camera) camera.start();
+            }
+        }
+
+        function stopTesting() {
+            isTesting = false;
+            if (camera) {
+                camera.stop();
+                camera = null;
+            }
+        }
+
+        function onTestResults(results) {
+            if (!isTesting || !model) return;
+            
+            const testCtx = document.getElementById('testCanvas').getContext('2d');
+            testCtx.clearRect(0, 0, videoWidth, videoHeight);
+            
+            if (results.multiHandLandmarks) {
+                let allLandmarks = [];
+                
+                for (const handLandmarks of results.multiHandLandmarks) {
+                    drawHandLandmarks(handLandmarks, testCtx);
+                    
+                    const coords = [];
+                    for (const lm of handLandmarks.landmark) {
+                        coords.push(lm.x, lm.y, lm.z);
+                    }
+                    allLandmarks.push(coords);
+                }
+                
+                while (allLandmarks.length < 2) {
+                    allLandmarks.push(new Array(63).fill(0));
+                }
+                
+                const sample = tf.tensor2d([allLandmarks.flat()]);
+                const prediction = model.predict(sample);
+                const probs = await prediction.data();
+                const maxIdx = probs.indexOf(Math.max(...probs));
+                const confidence = probs[maxIdx];
+                const predictedLabel = model.uniqueLabels[maxIdx];
+                
+                const display = document.getElementById('predictionDisplay');
+                display.textContent = `${predictedLabel} (${(confidence * 100).toFixed(1)}%)`;
+                
+                if (confidence > 0.7) {
+                    display.className = 'prediction-high';
+                } else if (confidence > 0.4) {
+                    display.className = 'prediction-medium';
+                } else {
+                    display.className = 'prediction-low';
+                }
+                
+                sample.dispose();
+                prediction.dispose();
+            } else {
+                document.getElementById('predictionDisplay').textContent = 'No hands detected';
+                document.getElementById('predictionDisplay').className = 'prediction-low';
+            }
+        }
+
+        // Camera management
+        async function startCamera(videoId, canvasId) {
+            video = document.getElementById(videoId);
+            canvas = document.getElementById(canvasId);
+            ctx = canvas.getContext('2d');
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: videoWidth, height: videoHeight, facingMode: 'user' }
+                });
+                
+                video.srcObject = stream;
+                await video.play();
+                
+                canvas.width = videoWidth;
+                canvas.height = videoHeight;
+                
+                if (typeof Camera !== 'undefined' && hands) {
+                    camera = new Camera(video, {
+                        onFrame: async () => {
+                            if (hands) await hands.send({ image: video });
+                        },
+                        width: videoWidth,
+                        height: videoHeight
+                    });
+                }
+            } catch (err) {
+                console.error('Camera error:', err);
+                alert('Camera access denied. Please allow camera access.');
+            }
+        }
+
+        function drawHandLandmarks(landmarks, drawCtx = ctx) {
+            if (!drawCtx) return;
+            
+            drawCtx.strokeStyle = '#00FF00';
+            drawCtx.lineWidth = 2;
+            drawCtx.fillStyle = '#00FF00';
+            
+            const connections = [
+                [0, 1, 2, 3, 4], [0, 5, 6, 7, 8], [0, 9, 10, 11, 12],
+                [0, 13, 14, 15, 16], [0, 17, 18, 19, 20], [5, 9, 13, 17]
+            ];
+            
+            for (const connection of connections) {
+                drawCtx.beginPath();
+                for (let i = 0; i < connection.length - 1; i++) {
+                    const start = landmarks[connection[i]];
+                    const end = landmarks[connection[i + 1]];
+                    if (i === 0) {
+                        drawCtx.moveTo(start.x * videoWidth, start.y * videoHeight);
+                    }
+                    drawCtx.lineTo(end.x * videoWidth, end.y * videoHeight);
+                }
+                drawCtx.stroke();
+            }
+            
+            for (const landmark of landmarks) {
+                drawCtx.beginPath();
+                drawCtx.arc(landmark.x * videoWidth, landmark.y * videoHeight, 3, 0, 2 * Math.PI);
+                drawCtx.fill();
+            }
+        }
+
+        // Storage
+        function saveDatasetToStorage() {
+            localStorage.setItem('gesture-dataset', JSON.stringify(dataset));
+        }
+
+        function loadDatasetFromStorage() {
+            const stored = localStorage.getItem('gesture-dataset');
+            if (stored) {
+                dataset = JSON.parse(stored);
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && isCollecting) {
+                e.preventDefault();
+                saveSample();
+            }
+        });
+    </script>
+</body>
+</html>
+
