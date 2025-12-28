@@ -389,21 +389,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
     
     <script>
-        // Global state
-        let hands = null;
-        let camera = null;
-        let model = null;
-        let dataset = {};
-        let isCollecting = false;
-        let isTesting = false;
-        let currentLabel = '';
-        let samples = [];
-        let currentSample = null;
-        let videoWidth = 640;
-        let videoHeight = 480;
-        let mediaPipeReady = false;
-
-        // Define all functions and assign to window immediately
+        // Define functions FIRST before any other code
+        // This ensures they're available when HTML onclick handlers are parsed
+        
         window.switchTab = function(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -415,8 +403,8 @@
             }
             document.getElementById(tab + 'Panel').classList.add('active');
             
-            stopCollecting();
-            stopTesting();
+            if (typeof stopCollecting === 'function') stopCollecting();
+            if (typeof stopTesting === 'function') stopTesting();
         };
 
         window.startCollecting = async function() {
@@ -451,7 +439,7 @@
                 console.error('Error starting collection:', err);
                 alert('Failed to start camera. Please check permissions.');
             }
-        }
+        };
 
         window.saveSample = function() {
             if (!isCollecting) {
@@ -694,6 +682,20 @@
                 camera = null;
             }
         };
+
+        // Global state (defined after functions)
+        let hands = null;
+        let camera = null;
+        let model = null;
+        let dataset = {};
+        let isCollecting = false;
+        let isTesting = false;
+        let currentLabel = '';
+        let samples = [];
+        let currentSample = null;
+        let videoWidth = 640;
+        let videoHeight = 480;
+        let mediaPipeReady = false;
 
         function onTestResults(results) {
             if (!isTesting || !model) return;
